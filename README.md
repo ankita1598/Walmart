@@ -25,10 +25,23 @@ The dataset consists of 13 columns and 421570 rows.
 | 9 | CPI | Double | NN.NN | Consumer Price Index | N |
 | 10 | Unemployment | Double | NN.NN | The Unemployment rate | N |
 ### SPAP plan for the Project
-**Goal:** Predict Weekly sales of Walmart
+
+**Goal:** Predict Weekly sales of Walmart 
+
+
 **Dependent Variable:** Weekly Sales
-**Specific Questions:**
+
+
+**Specific Questions:** Q1: Do the markdowns during a specific holiday improve the weekly sales of a particular department?
+                        Q2: Does higher unemployment rate for the week affect the sales of a store for that week? 
+
+
+
 **Independent Variable:** Unemployment rate, CPI, Markdown1, Markdown2, Markdown3, Markdown4, Fuel rate, Temperature, IsHoliday, Size, date, Store, and department.
+
+
 **Specific Analysis and Graphs:** Weekly sales by store, Weekly sales by Department, Overall monthly sales, Top performing departments and least performing department.
+
+
 ### References
 [https://www.kaggle.com/c/walmart-recruiting-store-sales-forecasting/overview](https://www.kaggle.com/c/walmart-recruiting-store-sales-forecasting/overview)
