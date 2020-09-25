@@ -41,5 +41,55 @@ The dataset consists of 13 columns and 421570 rows.
 
 **Specific Analysis and Graphs:** Weekly sales by store, Weekly sales by Department, Overall monthly sales, Top performing departments, and least performing department.
 
+### Key Performance Indicators (KPI’s)
+
+
+The KPI’s for our project are as follows -
+
+ - **Weekly Sales to Markdown ratio**
+ - **Sales of a deaprtment by store**
+
+**What is your desired outcome?**
+
+To increase weekly sales by intoducing new offers and promotions.
+
+**Why does this outcome matter?**
+
+The ratio of Weekly Sales to Markdown will tell us how the offers and promotions are working in order to increase the weekly sales of the store.
+
+**How are you going to measure progress?**
+
+Lower the ratio, greater the progress. When the ratio is low it means sales is good.
+
+**How can you influence the outcome?**
+
+We can influence the outcome by increasing the Markdown values.
+
+**Who is responsible for the outcome?**
+
+The Marketing team and PR team is responsible for the outcome.
+
+**How will you know you have achieved the outcome?**
+
+When the weekly sales are increasing over time and ratio is constant.
+
+**How often will you review progress towards the outcome?**
+
+In order to review progress we need to check the result every week or every 2 weeks.
+
+### Hypothesis
+
+**Department:** The sales of a specific department within a store will increase when markdowns are introduced, especially during special holidays.
+
+**Weekly_Sales:** The weekly sales are affected negatively when the unemployment rate as well as CPI is high.
+
+**Is_holiday:** If it is a holiday week then most of the stores will have better weekly sales and a lower CPI.
+
+**Temperature:** If the average temperature decreases then the sales of stores are affected negatively.
+
+**Consumer Price Index:** The CPI will decrease during holidays and when markdowns are introduced leading to improved weekly sales.
+
+**Markdowns:** Markdowns will improve the sales in all the stores.
+
 ### References
 [https://www.kaggle.com/c/walmart-recruiting-store-sales-forecasting/overview](https://www.kaggle.com/c/walmart-recruiting-store-sales-forecasting/overview)
