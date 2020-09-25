@@ -51,7 +51,7 @@ The KPI’s for our project are as follows -
 
 **What is your desired outcome?**
 
-To increase weekly sales by intoducing new offers and promotions.
+To increase weekly sales by introducing new offers and promotions.
 
 **Why does this outcome matter?**
 
