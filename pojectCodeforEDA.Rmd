@@ -1,0 +1,93 @@
+---
+title: "MVA project"
+author: "Lokesh Arora, Ankita Shinde"
+date: "10/1/2020"
+output: pdf_document
+Github Link: https://github.com/lokesh2334/walmart
+---
+```{r}
+library(lubridate)
+library("plyr")
+library("ggplot2")
+library(RColorBrewer)
+library("dplyr")
+```
+
+```{r}
+#dataset = read.csv("data.csv", header= T)
+head(dataset)
+```
+
+We can see that there are few null values in the data set for column Markdown 1 - 5. We will also split the data column in 3 as Day, Month and Year.
+
+```{r}
+dataset$Year <- year(ymd(dataset$Date))
+dataset$Month <- month(ymd(dataset$Date)) 
+dataset$Day <- day(ymd(dataset$Date))
+dataset$Dept = as.factor(dataset$Dept)
+dataset$Store = as.factor(dataset$Store)
+dataset$MarkDown1[is.na(dataset$MarkDown1)] = 0
+dataset$MarkDown2[is.na(dataset$MarkDown2)] = 0
+dataset$MarkDown3[is.na(dataset$MarkDown3)] = 0
+dataset$MarkDown4[is.na(dataset$MarkDown4)] = 0
+dataset$MarkDown5[is.na(dataset$MarkDown5)] = 0
+head(dataset)
+```
+```{r}
+dim(dataset)
+```
+
+As we can see from the result now there are 19 columns and 421570 rows.
+
+```{r}
+names(dataset)
+```
+Here are all the columns.
+
+```{r}
+month_wise =ddply(dataset, .(Month), summarize,  Sales=mean(Weekly_Sales))
+month_wise$Month = as.factor(month_wise$Month)
+ggplot(month_wise,  aes(fill=Month, y=Sales, x=Month)) + 
+    geom_bar(position="dodge", stat="identity") + ggtitle("Sales by month.") +
+  scale_fill_manual(values=colorRampPalette(brewer.pal(9, "YlGnBu"))(12)) + 
+  theme(legend.position = "none")
+```
+The above graph shows the average sales by walmart every month. We can see that the Sales is always most during December.
+
+```{r fig.width = 15}
+store_wise =ddply(dataset, .(Store), summarize,  Sales=mean(Weekly_Sales))
+ggplot(store_wise,  aes(fill=Store, y=Sales, x=Store)) + 
+  geom_bar(position="dodge", stat="identity") + ggtitle("Sales by Store") + 
+  scale_fill_manual(values=colorRampPalette(brewer.pal(9, "YlGnBu"))(45)) + 
+  theme(legend.position = "none")
+```
+```{r fig.width = 18}
+dept_wise =ddply(dataset, .(Dept), summarize,  Sales=mean(Weekly_Sales))
+ggplot(dept_wise,  aes(fill=Dept, y=Sales, x=Dept)) + 
+  geom_bar(position="dodge", stat="identity") + ggtitle("Sales by Dept") + 
+  theme(legend.position = "none") +
+  scale_fill_manual(values=colorRampPalette(brewer.pal(9, "YlGnBu"))(99))
+```
+
+```{r fig.width = 18}
+
+dept_sales =ddply(dataset, c("Year","Dept"), summarize,  Sales=sum(Weekly_Sales))
+top_depts = arrange(dept_sales,Year, desc(Sales)) %>% group_by(Year) %>% top_n(n = 10)
+top_depts$Dept = as.factor(top_depts$Dept)
+ggplot(data=top_depts, aes(x=Year, y=Sales, fill=Dept)) + 
+  geom_bar(stat="identity", position=position_dodge()) + 
+  geom_text(aes(label=Dept), position = position_dodge2(width = 0.9, preserve = "single"), angle = 0, vjust=-0.3, hjust=0.40) +
+  scale_fill_manual(values=colorRampPalette(brewer.pal(9, "YlGnBu"))(10)) + 
+  ggtitle("Top performing department") + theme(legend.position = "none")
+```
+The above graph shows the depatment where the sales is maximum.
+```{r fig.width = 18}
+bottom_depts = arrange(dept_sales,Year, desc(Sales)) %>% group_by(Year) %>% top_n(n = -10)
+bottom_depts$Dept = as.factor(bottom_depts$Dept)
+ggplot(data=bottom_depts, aes(x=Year, y=Sales, fill=Dept)) + 
+  geom_bar(stat="identity", position=position_dodge()) + 
+  geom_text(aes(label=Dept), position = position_dodge2(width = 0.9, preserve = "single"), angle = 0, vjust=-0.3, hjust=0.40) +
+  scale_fill_manual(values=colorRampPalette(brewer.pal(9, "YlGnBu"))(12)) + 
+  ggtitle("Least performing department") + theme(legend.position = "none")
+```
+The above graph shows the departments where sales is least. We can also see that the departmnets 47 in is loss.
