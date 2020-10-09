@@ -3,7 +3,7 @@ title: "MVA project"
 author: "Lokesh Arora, Ankita Shinde"
 date: "10/1/2020"
 output: pdf_document
-Github Link: https://github.com/lokesh2334/walmart
+Github Link: https://github.com/ankita1598/Walmart
 ---
 ```{r}
 library(lubridate)
