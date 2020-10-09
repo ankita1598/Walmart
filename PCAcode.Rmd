@@ -1,0 +1,178 @@
+---
+title: "Assignment 5"
+author: "Lokesh Arora, Ankita Shinde"
+date: "10/8/2020"
+output: pdf_document
+Github Link: https://github.com/ankita1598/Walmart
+---
+```{r}
+library(lubridate)
+library("plyr")
+library("ggplot2")
+library(RColorBrewer)
+library("dplyr")
+```
+
+```{r}
+dataset = read.csv("data.csv", header= T)
+head(dataset)
+```
+
+We can see that there are few null values in the data set for column Markdown 1 - 5. We will also split the data column in 3 as Day, Month and Year.
+
+```{r}
+dataset$Year <- year(ymd(dataset$Date))
+dataset$Month <- month(ymd(dataset$Date)) 
+dataset$Day <- day(ymd(dataset$Date))
+dataset$Dept = as.factor(dataset$Dept)
+dataset$Store = as.factor(dataset$Store)
+dataset$MarkDown1[is.na(dataset$MarkDown1)] = 0
+dataset$MarkDown2[is.na(dataset$MarkDown2)] = 0
+dataset$MarkDown3[is.na(dataset$MarkDown3)] = 0
+dataset$MarkDown4[is.na(dataset$MarkDown4)] = 0
+dataset$MarkDown5[is.na(dataset$MarkDown5)] = 0
+dataset = fastDummies::dummy_cols(dataset, select_columns = "Type")
+dataset$IsHoliday[dataset$isHoliday == "False"] = 0
+dataset$IsHoliday[dataset$isHoliday == "True"] = 1
+head(dataset)
+```
+```{r}
+dim(dataset)
+```
+
+As we can see from the result now there are 19 columns and 421570 rows.
+
+```{r}
+names(dataset)
+```
+
+Here are all the columns.
+
+```{r}
+dataset$Dept = as.numeric(as.factor(dataset$Dept))
+dataset$Store = as.numeric(as.factor(dataset$Store))
+features = c("Store","Dept","IsHoliday","Type_A","Type_B","Type_C","Size","Temperature","Fuel_Price","MarkDown1","MarkDown2","MarkDown3","MarkDown4","MarkDown5","CPI","Unemployment","Year","Month","Day")
+correlation = cor(select(dataset,features))
+correlation
+```
+```{r}
+dataset_pca = prcomp(select(dataset,features), scale=TRUE)
+dataset_pca
+```
+
+```{r}
+summary(dataset_pca)
+```
+```{r}
+dataset_eigen = dataset_pca$sdev^2
+names(dataset_eigen) <- paste("PC",1:19,sep="")
+dataset_eigen
+
+```
+```{r}
+sumlambdas = sum(dataset_eigen)
+sumlambdas
+```
+```{r}
+propvar = dataset_eigen/sumlambdas
+propvar
+```
+```{r}
+dataset_cumvar <- cumsum(propvar)
+dataset_cumvar
+```
+```{r}
+matlambdas <- rbind(dataset_eigen,propvar,dataset_cumvar)
+rownames(matlambdas) <- c("Eigenvalues","Prop. variance","Cum. prop. variance")
+round(matlambdas,4)
+```
+```{r}
+summary(dataset_pca)
+```
+```{r}
+dataset_pca$rotation
+```
+```{r}
+print(dataset_pca)
+```
+
+1st Option
+Based on retating components that account for 70% to 90% of the variance, we need to retain PC1 to PC8 or PC1 to PC12.
+
+2nd Option
+Based on the rule of sum to choose all components with eigen values larger than 0.7, we need to retain PC1 to PC12.
+
+
+```{r}
+dataset_pca$x
+```
+```{r}
+weeklySales <- data.frame(WeeklySales=dataset$weeklySales)
+dataset2_pca <- cbind(weeklySales, dataset_pca$x)
+dataset2_pca
+```
+```{r}
+tabmeansPC <- aggregate(dataset2_pca[,2:13],by=list(weeklySales=dataset$weeklySales),mean)
+tabmeansPC
+```
+```{r}
+tabmeansPC <- tabmeansPC[rev(order(tabmeansPC$weeklySales)),]
+tabmeansPC
+```
+```{r message=TRUE, warning=TRUE}
+tabfmeans <- t(tabmeansPC[,-1])
+```
+
+```{r}
+
+colnames(tabfmeans) <- t(as.vector(tabmeansPC[1]))
+```
+```{r}
+tabsdsPC <- aggregate(dataset2_pca[,2:13],by=list(weeklySales=dataset$weeklySales),sd)
+tabfsds <- t(tabsdsPC[,-1])
+colnames(tabfsds) <- t(as.vector(tabsdsPC[1]))
+```
+```{r}
+plot(dataset_eigen, xlab = "Component number", ylab = "Component variance", type = "l", main = "Scree diagram")
+```
+
+```{r}
+plot(log(dataset_eigen), xlab = "Component number",ylab = "log(Component variance)", type="l",main = "Log(eigenvalue) diagram")
+```
+```{r}
+summary(dataset_pca)
+```
+```{r}
+cov(dataset_pca$x)
+```
+```{r}
+dataset_pca$rotation[,1]
+dataset_pca$rotation
+```
+```{r}
+#plot(select(dataset,features))
+```
+```{r}
+center <- dataset_pca$center
+scale <- dataset_pca$scale
+new_dataset <- as.matrix(select(dataset,features))
+new_dataset
+```
+
+```{r}
+drop(scale(new_dataset,center=center, scale=scale)%*%dataset_pca$rotation[,1])
+```
+```{r}
+predict(dataset_pca)[,1]
+```
+```{r}
+out <- sapply(1:13, function(i){plot(dataset$weeklySales,dataset_pca$x[,i],xlab=paste("PC",i,sep=""),ylab="Weekly Sales")})
+```
+
+```{r}
+#pairs(dataset_pca$x[,1:13], ylim = c(-6,4),xlim = c(-6,4),panel=function(x,y,...){text(x,y,dataset$weeklySales)})
+```
+
+
+
+
