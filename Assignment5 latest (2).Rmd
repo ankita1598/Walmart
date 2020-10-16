@@ -1,0 +1,126 @@
+---
+title: "Assignment 5"
+author: "Lokesh Arora, Ankita Shinde"
+date: "10/8/2020"
+output:
+  word_document: default
+  pdf_document: default
+Github Link: https://github.com/ankita1598/Walmart
+---
+```{r}
+library(lubridate)
+library("plyr")
+library("ggplot2")
+library(RColorBrewer)
+library("dplyr")
+library("geosphere")
+```
+
+```{r}
+dataset = read.csv("data.csv", header= T)
+head(dataset)
+```
+
+We can see that there are few null values in the data set for column Markdown 1 - 5. We will also split the data column in 3 as Day, Month and Year.
+
+```{r}
+dataset$Year <- year(ymd(dataset$Date))
+dataset$Month <- month(ymd(dataset$Date)) 
+dataset$Day <- day(ymd(dataset$Date))
+dataset$Dept = as.factor(dataset$Dept)
+dataset$Store = as.factor(dataset$Store)
+dataset$MarkDown1[is.na(dataset$MarkDown1)] = 0
+dataset$MarkDown2[is.na(dataset$MarkDown2)] = 0
+dataset$MarkDown3[is.na(dataset$MarkDown3)] = 0
+dataset$MarkDown4[is.na(dataset$MarkDown4)] = 0
+dataset$MarkDown5[is.na(dataset$MarkDown5)] = 0
+dataset = fastDummies::dummy_cols(dataset, select_columns = "Type")
+dataset$IsHoliday[dataset$isHoliday == "False"] = 0
+dataset$IsHoliday[dataset$isHoliday == "True"] = 1
+head(dataset)
+```
+
+```{r}
+sapply(dataset, function(x) sum(is.infinite(x)))
+```
+```{r}
+sapply(dataset, function(x) sum(is.na(x)))
+```
+
+```{r}
+features = c("IsHoliday","Type_A","Type_B","Type_C","Size","Temperature","Fuel_Price","CPI","Unemployment","Year","Month","Day")
+dataset2  = select(dataset,features)  %>% slice(1:1000)
+dim(dataset2)
+```
+
+```{r}
+Distance <- dist(dataset2, method="euclidean")
+```
+```{r}
+#Hirerarchical Methods
+#1. Single Linkage Method
+# Invoking hclust command (cluster analysis by single linkage method)
+clus_sales_prediction.nn <- hclust(Distance, method = "single")
+clus_sales_prediction.nn
+```
+
+```{r}
+#Plotting of dendrogram using Single Linkage method
+plot(as.dendrogram(clus_sales_prediction.nn),ylab="Distance between
+patients",ylim=c(0,9), main="Dendrogram of first 1000 rows using Single Linkage method")
+```
+```{r}
+#2. Average Linkage Method
+clus_sales_prediction.avl <- hclust(Distance, method = "average")
+clus_sales_prediction.avl
+```
+
+```{r}
+#Plotting of dendrogram using Average Linkage method
+plot(as.dendrogram(clus_sales_prediction.avl),ylab="Distance between
+patients",ylim=c(0,33),
+ main="Dendrogram of first 1000 rows using Average Linkage method")
+```
+
+```{r}
+#3. Complete Linkage Method
+clus_sales_prediction.fn <- hclust(Distance)
+clus_sales_prediction.fn
+
+```
+```{r}
+plot(as.dendrogram(clus_sales_prediction.fn),ylab="Distance between
+patients",ylim=c(0,60),
+ main="Dendrogram of first 1000 rows using Complete Linkage method")
+```
+```{r}
+#Non-hirerarchical Method
+#K-Means
+# Centers (k's) are numbers thus, 10 random sets are chosen
+(kmeans2.dataset <- kmeans(dataset2,2,nstart = 10))
+
+```
+
+```{r}
+# Computing the percentage of variation accounted for. Two clusters
+perc.var.2 <- round(100*(1 -
+kmeans2.dataset$betweenss/kmeans2.dataset$totss),1)
+names(perc.var.2) <- "Perc. 2 clus"
+perc.var.2
+
+```
+
+```{r}
+```
+
+
+
+
+
+
+
+
+
+
+
+
