@@ -1,0 +1,167 @@
+---
+title: "Assignment7"
+author: "Lokesh Arora, Ankita Shinde"
+date: "10/29/2020"
+output: html_document
+---
+```{r}
+#Loading Packages
+library(mvtnorm)
+library(dplyr)
+library(psych)
+library(lubridate)
+library("plyr")
+library("ggplot2")
+library(RColorBrewer)
+library("dplyr")
+library(carData)
+library(car)
+```
+
+```{r}
+#Loading Dataset
+dataset = read.csv("data.csv", header= T)
+head(dataset)
+```
+
+```{r}
+#We can see that there are few null values in the data set for column Markdown 1 - 5. We will also split the data column in 3 as Day, Month and Year.
+dataset$Year <- year(ymd(dataset$Date))
+dataset$Month <- month(ymd(dataset$Date)) 
+dataset$Day <- day(ymd(dataset$Date))
+dataset$Dept = as.factor(dataset$Dept)
+dataset$Store = as.factor(dataset$Store)
+dataset$MarkDown1[is.na(dataset$MarkDown1)] = 0
+dataset$MarkDown2[is.na(dataset$MarkDown2)] = 0
+dataset$MarkDown3[is.na(dataset$MarkDown3)] = 0
+dataset$MarkDown4[is.na(dataset$MarkDown4)] = 0
+dataset$MarkDown5[is.na(dataset$MarkDown5)] = 0
+dataset = fastDummies::dummy_cols(dataset, select_columns = "Type")
+dataset$IsHoliday[dataset$isHoliday == "False"] = 0
+dataset$IsHoliday[dataset$isHoliday == "True"] = 1
+dataset$Dept = as.numeric(as.factor(dataset$Dept))
+dataset$Store = as.numeric(as.factor(dataset$Store))
+features = c("weeklySales","Store","Dept","IsHoliday","Type_A","Type_B","Type_C","Size","Temperature","Fuel_Price","MarkDown1","MarkDown2","MarkDown3","MarkDown4","MarkDown5","CPI","Unemployment","Year","Month","Day")
+dataset = select(dataset,features)
+head(dataset)
+```
+
+```{r}
+dim(dataset)
+```
+```{r}
+names(dataset)
+```
+```{r}
+model = lm(weeklySales~.,data=dataset)
+summary(model)
+```
+
+```{r}
+library(MASS)
+stepModelAIC = stepAIC(model, direction = "backward")
+```
+
+```{r}
+summary(stepModelAIC)
+```
+```{r}
+stepModelAIC2 = stepAIC(model, direction = "backward", k=log(nrow(dataset)))
+```
+
+```{r}
+model2 = lm(weeklySales~Store,data=dataset)
+summary(model2)
+```
+
+```{r}
+stepModelAIC_forward = stepAIC(model2,direction = "forward",scope=list(lower=model2, upper=~Store+Dept+IsHoliday+Type_A+Type_B+Type_C+Size+Temperature+Fuel_Price+MarkDown1+MarkDown2+MarkDown3+MarkDown4+MarkDown5+CPI+Unemployment+Year+Month+Day))
+```
+```{r}
+finalModel = lm(formula = weeklySales ~ Store + Dept + IsHoliday + Type_A + 
+    Type_B + Size + Temperature + Fuel_Price + MarkDown1 + MarkDown3 + 
+    MarkDown5 + CPI + Unemployment + Year + Month + Day, data = dataset)
+summary(finalModel)
+```
+
+```{r}
+finalModel2 = lm(formula = weeklySales ~ Store + Dept + Type_A + Type_B + Size + Fuel_Price + 
+    MarkDown1 + MarkDown3 + MarkDown5 + CPI + Unemployment + 
+    Year + Month + Day, data = dataset)
+summary(finalModel2)
+```
+```{r}
+anova(finalModel, finalModel2)
+
+```
+
+FinalModel is based upon the results of setpAIC without log whereas the FinalModel2 is based on logs. When we compare F-Statistic value we see FinalModel2 is better and has less variables so we go ahead with finalModel2.
+
+
+```{r}
+confint(finalModel2,level=0.95)
+```
+```{r}
+anova(finalModel2)
+```
+```{r}
+vcov(finalModel2)
+```
+
+
+```{r}
+cov2cor(vcov(finalModel2))
+```
+
+```{r}
+plot(finalModel2)
+```
+
+```{r}
+outlierTest(finalModel2)
+```
+
+```{r}
+qqPlot(finalModel2, main="QQ Plot")
+
+```
+
+```{r}
+# Cook's Distance plot
+cutoff <- 4/((nrow(dataset)-length(finalModel2$coefficients)-2))
+plot(finalModel2, which=4, cook.levels=cutoff)
+```
+
+```{r}
+influencePlot(finalModel2, id.method="identify", main="Influence Plot", sub="Circle s
+ize is proportial to Cook's Distance" )
+```
+
+```{r}
+sresid <- studres(finalModel2)
+hist(sresid, freq=FALSE,
+ main="Distribution of Studentized Residuals")
+xfit<-seq(min(sresid),max(sresid),length=40)
+yfit<-dnorm(xfit)
+lines(xfit, yfit)
+```
+
+
+
+```{r}
+ncvTest(finalModel2)
+```
+
+
+```{r}
+vif(finalModel2) 
+```
+
+```{r}
+sqrt(vif(finalModel2)) > 2
+```
+
+Type_A, Type_B and Year have multi-collinearity 
+
+
+
