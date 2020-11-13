@@ -1,0 +1,75 @@
+---
+title: "Assignment7"
+author: "Lokesh Arora, Ankita Shinde"
+date: "10/29/2020"
+output: html_document
+---
+```{r}
+#Loading Packages
+library(mvtnorm)
+library(dplyr)
+library(psych)
+library(lubridate)
+library("plyr")
+library("ggplot2")
+library(RColorBrewer)
+library("dplyr")
+library(carData)
+library(car)
+```
+
+```{r}
+#Loading Dataset
+dataset = read.csv("data.csv", header= T)
+head(dataset)
+```
+
+```{r}
+#We can see that there are few null values in the data set for column Markdown 1 - 5. We will also split the data column in 3 as Day, Month and Year.
+dataset$Year <- year(ymd(dataset$Date))
+dataset$Month <- month(ymd(dataset$Date)) 
+dataset$Day <- day(ymd(dataset$Date))
+dataset$Dept = as.factor(dataset$Dept)
+dataset$Store = as.factor(dataset$Store)
+dataset$MarkDown1[is.na(dataset$MarkDown1)] = 0
+dataset$MarkDown2[is.na(dataset$MarkDown2)] = 0
+dataset$MarkDown3[is.na(dataset$MarkDown3)] = 0
+dataset$MarkDown4[is.na(dataset$MarkDown4)] = 0
+dataset$MarkDown5[is.na(dataset$MarkDown5)] = 0
+dataset = fastDummies::dummy_cols(dataset, select_columns = "Type")
+dataset$IsHoliday[dataset$isHoliday == "False"] = 0
+dataset$IsHoliday[dataset$isHoliday == "True"] = 1
+dataset$Dept = as.numeric(as.factor(dataset$Dept))
+dataset$Store = as.numeric(as.factor(dataset$Store))
+features = c("weeklySales","Store","Dept","IsHoliday","Type_A","Type_B","Type_C","Size","Temperature","Fuel_Price","MarkDown1","MarkDown2","MarkDown3","MarkDown4","MarkDown5","CPI","Unemployment","Year","Month","Day")
+dataset = select(dataset,features)
+head(dataset)
+```
+
+```{r}
+dim(dataset)
+```
+```{r}
+names(dataset)
+```
+```{r}
+train <- data[1:800,]
+test <- data[801:889,]
+model = glm(weeklySales~.,data=dataset)
+summary(model)
+```
+
+```{r}
+anova(model, test="Chisq")
+```
+```{r}
+library(pscl)
+pR2(model)
+```
+```{r}
+fitted.results <- predict(model,newdata=subset(test,select=c(dataset,features)),type='response')
+fitted.results <- ifelse(fitted.results > 0.5,1,0)
+misClasificError <- mean(fitted.results != test$Survived)
+print(paste('Accuracy',1-misClasificError))
+```
+
